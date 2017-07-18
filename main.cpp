@@ -1,6 +1,8 @@
 #include "MST.hpp"
-#include <cstdlib>
+#include <chrono>
 #include <iostream>
+
+typedef std::chrono::high_resolution_clock Clock;
 
 int main(int argc, char *argv[]) {
 	// check command line arguments
@@ -34,19 +36,34 @@ int main(int argc, char *argv[]) {
 
 	// example usage in a loop
 	double t = t0;
-	for (size_t i = 0; i < n && t < tf; ++i) {
+	double avg_error = 0;
+	double max_error = 0;
+	const Clock::time_point t_start = Clock::now();
+	for (size_t i = 0; i < n; ++i) {
+		// select test data
 		const MST::Vector sensor_output = y.col(i);
 		const MST::Vector expected_input = u.col(i);
 
+		// run controller
 		const MST::Vector control_input =
 		    controller(t, reference_output(t), sensor_output);
 
 		// compare with test data
 		const double error = (control_input - expected_input).norm();
-		if (error > 1e-3) {
-			printf("Step %4zu [t = %.5f]: error = %f\n", i, t, error);
+		avg_error += error;
+		if (error > max_error) {
+			max_error = error;
 		}
 
 		t += dt;
 	}
+	const Clock::time_point t_stop = Clock::now();
+	const std::chrono::duration<double, std::micro> t_avg =
+	    (t_stop - t_start) / n;
+	const double Dt = t_avg.count();
+	avg_error /= n;
+
+	std::cout << "Avg. error: " << avg_error << std::endl;
+	std::cout << "Max. error: " << max_error << std::endl;
+	std::cout << "Avg. time per iteration: " << Dt << "µs" << std::endl;
 }
