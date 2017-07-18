@@ -35,6 +35,7 @@ For a description of the algorithms, see:
 #include <array>
 #include <functional>
 
+#include <boost/serialization/array_wrapper.hpp> // Added by Imene
 #include <boost/multi_array.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
