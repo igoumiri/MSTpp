@@ -114,6 +114,14 @@ public:
 		return *this;
 	}
 
+	Vector operator()(const double t, const Vector &v) {
+		const Vector output = step(t, v, Vector());
+		if (m_next) {
+			return (*m_next)(t, output, Vector());
+		}
+		return output;
+	}
+
 	Vector operator()(const double t, const Vector &ref, const Vector &actual) {
 		const Vector output = step(t, ref, actual);
 		if (m_next) {
