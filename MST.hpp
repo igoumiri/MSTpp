@@ -269,6 +269,39 @@ private:
 	}
 };
 
+class NonLinearityFirstComponent : public System {
+public:
+	NonLinearityFirstComponent(const Config &config) {
+		Vector x(Utils::load_dat<Vector>(config.getString("x")));
+		Vector y(Utils::load_dat<Vector>(config.getString("y")));
+
+		const auto grid_iter_list = {x.data()};
+		const auto grid_sizes = {x.size()};
+		const size_t num_elements = x.size();
+
+		m_f.reset(new InterpMultilinear<1, double>(grid_iter_list.begin(),
+		                                           grid_sizes.begin(), y.data(),
+		                                           y.data() + num_elements));
+	}
+
+	virtual Vector step(const double, const Vector &r, const Vector &) {
+		if (r.rows() == 0 || r.cols() == 0) {
+			return Vector();
+		}
+		Vector r1(r);
+		r1(0) = f(r(0));
+		return r1;
+	}
+
+	double f(const double x) const {
+		const std::array<double, 1> args = {{x}};
+		return m_f->interp(args.begin());
+	}
+
+private:
+	std::unique_ptr<InterpMultilinear<1, double>> m_f;
+};
+
 class InputConverter : public System {
 public:
 	InputConverter(const Config &config) {
