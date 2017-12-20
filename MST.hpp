@@ -299,7 +299,7 @@ public:
 	}
 
 private:
-	std::unique_ptr<InterpMultilinear<1, double>> m_f;
+	std::shared_ptr<InterpMultilinear<1, double>> m_f;
 };
 
 class InputConverter : public System {
